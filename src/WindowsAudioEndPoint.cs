@@ -225,17 +225,25 @@ namespace SIPSorceryMedia.Windows
             return Task.CompletedTask;
         }
 
-        public Task PauseAudio()
+        public Task PauseAudio(bool affectWaveOut = false)
         {
             _isPaused = true;
             _waveInEvent?.StopRecording();
+            if (affectWaveOut)
+            {
+                _waveOutEvent?.Pause();
+            }
             return Task.CompletedTask;
         }
 
-        public Task ResumeAudio()
+        public Task ResumeAudio(bool affectWaveOut = false)
         {
             _isPaused = false;
             _waveInEvent?.StartRecording();
+            if (affectWaveOut)
+            {
+                _waveOutEvent?.Play();
+            }
             return Task.CompletedTask;
         }
 
