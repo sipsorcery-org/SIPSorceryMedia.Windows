@@ -222,6 +222,7 @@ namespace SIPSorceryMedia.Windows
         {
             _isAudioSourcePaused = true;
             _waveInEvent?.StopRecording();
+            _waveOutEvent?.Stop();
             return Task.CompletedTask;
         }
 
@@ -229,6 +230,7 @@ namespace SIPSorceryMedia.Windows
         {
             _isAudioSourcePaused = false;
             _waveInEvent?.StartRecording();
+            _waveOutEvent?.Play();
             return Task.CompletedTask;
         }
 
@@ -316,7 +318,7 @@ namespace SIPSorceryMedia.Windows
         /// <param name="pcmSample">Raw PCM sample from remote party.</param>
         public void GotAudioSample(byte[] pcmSample)
         {
-            if (_waveProvider != null)
+            if (_waveProvider != null && !_isPaused)
             {
                 _waveProvider.AddSamples(pcmSample, 0, pcmSample.Length);
             }
@@ -324,7 +326,7 @@ namespace SIPSorceryMedia.Windows
 
         public void GotAudioRtp(IPEndPoint remoteEndPoint, uint ssrc, uint seqnum, uint timestamp, int payloadID, bool marker, byte[] payload)
         {
-            if (_waveProvider != null && _audioEncoder != null)
+            if (_waveProvider != null && _audioEncoder != null && !_isPaused)
             {
                 var pcmSample = _audioEncoder.DecodeAudio(payload, _audioFormatManager.SelectedFormat);
                 byte[] pcmBytes = pcmSample.SelectMany(x => BitConverter.GetBytes(x)).ToArray();
